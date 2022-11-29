@@ -16,15 +16,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решен
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		docker-compose.yaml = docker-compose.yaml
+		Dockerfile = Dockerfile
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Entities", "Entities\Entities.csproj", "{659850FA-2FAB-45B2-8C7C-8A63D249A2ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Entities", "Entities\Entities.csproj", "{659850FA-2FAB-45B2-8C7C-8A63D249A2ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dal", "Dal\Dal.csproj", "{E239C6BF-5789-41CF-ABCD-E601841839D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dal", "Dal\Dal.csproj", "{E239C6BF-5789-41CF-ABCD-E601841839D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DownloaderMoviePremiereService", "DownloaderMoviePremiereService\DownloaderMoviePremiereService.csproj", "{ACC0CAE6-D44C-4EE8-A637-A834D2D1FF66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DownloaderMoviePremiereService", "DownloaderMoviePremiereService\DownloaderMoviePremiereService.csproj", "{ACC0CAE6-D44C-4EE8-A637-A834D2D1FF66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{A6A12715-965B-4627-A5F6-8954CB0D3C63}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{A6A12715-965B-4627-A5F6-8954CB0D3C63}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

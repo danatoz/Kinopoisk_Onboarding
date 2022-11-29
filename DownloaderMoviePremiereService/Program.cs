@@ -1,17 +1,22 @@
+using Common;
 using Dal;
 using DownloaderMoviePremiereService;
 using Quartz;
 using Microsoft.EntityFrameworkCore;
 
 IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices((hostcontext, services ) =>
+    .ConfigureServices((hostContext, services ) =>
     {
-        
+        var config = new SharedConfiguration
+        {
+            ApiKey = hostContext.Configuration["ApiKey"]
+        };
+        services.AddSingleton(config);
         services.AddQuartz(q =>
         {
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseNpgsql(hostcontext.Configuration.GetConnectionString("Default"));
+                options.UseNpgsql(hostContext.Configuration.GetConnectionString("Default"));
             });
             q.UseMicrosoftDependencyInjectionJobFactory();
 
@@ -22,7 +27,7 @@ IHost host = Host.CreateDefaultBuilder(args)
             q.AddTrigger(options => options
                 .ForJob(jobKey)
                 .WithIdentity("UpdateMoviesPremiereJob-trigger")
-                .WithCronSchedule("0 0 0 1 1/1 ? *"));
+                .WithCronSchedule("10/1 * * * * ?"));//"0 0 0 1 1/1 ? *"
         });
 
         services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

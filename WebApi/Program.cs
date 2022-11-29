@@ -1,6 +1,5 @@
-using System.IO.IsolatedStorage;
 using System.Reflection;
-using System.Xml.Linq;
+using Common;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Dal;
@@ -8,6 +7,8 @@ using Dal;
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
+
+
 #region Services
 
 services.AddControllers();
@@ -28,36 +29,31 @@ services.AddSwaggerGen(c =>
     }
 );
 
+var config = new SharedConfiguration
+{
+    ApiKey = configuration["ApiKey"]
+};
+services.AddSingleton(config);
+
 services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(configuration.GetConnectionString("Default"));
 });
 
 services.AddRouting(options => options.LowercaseUrls = true);
-//services.AddHttpsRedirection(options =>
-//{
-//    options.HttpsPort = 5001;
-//});
 
 #endregion
+
 
 var app = builder.Build();
 
 #region Middleware
-
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
-//    app.UseSwagger();
-//    app.UseSwaggerUI();
-//}
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API - V1");
 });
-//app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 app.UseEndpoints(endpoints =>

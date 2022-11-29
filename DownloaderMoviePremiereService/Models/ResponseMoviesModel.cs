@@ -1,4 +1,4 @@
-namespace WebApi.Models;
+namespace DownloaderMoviePremiereService.Models;
 
 class ResponseMoviesModel
 {

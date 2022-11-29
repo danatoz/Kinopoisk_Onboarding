@@ -5,11 +5,16 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["./WebApi.csproj", "Kinopoisk_Onboarding/"]
-COPY ["../.", "Kinopoisk_Onboarding/"]
-RUN dotnet restore "Kinopoisk_Onboarding/WebApi.csproj"
+COPY ["./WebApi/WebApi.csproj", "WebApi/"]
+COPY ["./Common/Common.csproj", "Common/"]
+COPY ["./Dal/Dal.csproj", "Dal/"]
+
+RUN dotnet restore "WebApi/WebApi.csproj"
+RUN dotnet restore "Common/Common.csproj"
+RUN dotnet restore "Dal/Dal.csproj"
+
 COPY . .
-WORKDIR "/src/Kinopoisk_Onboarding"
+WORKDIR "/src/WebApi"
 RUN dotnet build "WebApi.csproj" -c Release -o /app/build
 
 FROM build AS publish
