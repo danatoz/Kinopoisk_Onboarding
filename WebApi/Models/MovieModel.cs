@@ -1,4 +1,5 @@
 using Common.Enums;
+using Entities;
 
 namespace WebApi.Models;
 
@@ -16,4 +17,22 @@ class MovieModel
     public List<GenreModel>? genres { get; set; } 
 
     public string? duration { get; set; }
+
+    public static Movie? ConvertToEntity(MovieModel? obj)
+    {
+        return obj != null ? new Movie
+        {
+            KinopoiskId = obj.kinopoiskId,
+            NameRu = obj.nameRu,
+            PosterUrl = obj.posterUrl,
+            Duration = TimeSpan.Parse(obj.duration),
+            //Genres = obj.genres,
+            //Countries = obj.countries
+        } : null;
+    }
+
+    public static List<Movie?> ConvertToEntities(List<MovieModel>? objs)
+    {
+        return objs.Select(ConvertToEntity).ToList();
+    }
 }

@@ -8,7 +8,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{A6398E81-1B84-4317-B364-37F0399965F2}"
 	ProjectSection(SolutionItems) = preProject
 		Docker\.dockerignore = Docker\.dockerignore
-		Docker\docker-compose.yaml = Docker\docker-compose.yaml
 		Docker\Dockerfile = Docker\Dockerfile
 	EndProjectSection
 EndProject

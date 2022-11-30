@@ -40,18 +40,23 @@ class UpdateMoviesPremiereJob : IJob
         {
             var content = await response.Content.ReadAsStringAsync();
             var jsonResult = JsonConvert.DeserializeObject<ResponseMoviesModel>(content);
-            var entity = MovieModel.ConvertToEntities(jsonResult?.items?.ToList());
+            var movies = MovieModel.ConvertToEntities(jsonResult?.items?.ToList());
 
             try
             {
-                await _dbContext.Movies.AddRangeAsync(entity);
+                var logEntity = new MoviePremiereUpdateLog { CreationDate = DateTime.UtcNow };
+                await _dbContext.MoviePremiereUpdateLogs.AddAsync(logEntity);
                 await _dbContext.SaveChangesAsync();
 
-                await _dbContext.MoviePremiereUpdateLogs.AddAsync(new MoviePremiereUpdateLog
-                    { CreationDate = DateTimeOffset.Now });
+                foreach (var movie in movies.Where(movie => movie != null))
+                {
+                    movie.MoviePremiereUpdateLogId = logEntity.Id;
+                }
+
+                await _dbContext.Movies.AddRangeAsync(movies);
                 await _dbContext.SaveChangesAsync();
 
-                return entity.Count;
+                return movies.Count;
             }
             catch (Exception e)
             {
@@ -61,6 +66,7 @@ class UpdateMoviesPremiereJob : IJob
         }
 
         //TODO Что если статус код отрицательный
+        Task.Delay(new TimeSpan(0, 1, 0));
 
         return await Update();
     }

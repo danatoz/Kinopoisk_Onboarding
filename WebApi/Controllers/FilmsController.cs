@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Common;
 using Common.Enums;
@@ -5,9 +6,10 @@ using Dal;
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Filters;
 using WebApi.Models;
-using Newtonsoft;
 using Newtonsoft.Json;
-using System.Linq;
+using Entities;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.OpenApi.Extensions;
 using WebApi.Models.ViewModel;
 
 namespace WebApi.Controllers
@@ -27,11 +29,14 @@ namespace WebApi.Controllers
 
         private readonly AppDbContext _dbContext;
 
-        public FilmsController(ILogger<FilmsController> logger, SharedConfiguration sharedConfiguration, AppDbContext dbContext)
+        private readonly IDistributedCache _cache;
+
+        public FilmsController(ILogger<FilmsController> logger, SharedConfiguration sharedConfiguration, AppDbContext dbContext, IDistributedCache cache)
         {
             _logger = logger;
             _sharedConfiguration = sharedConfiguration;
             _dbContext = dbContext;
+            _cache = cache;
         }
 
         /// <summary>
@@ -85,6 +90,30 @@ namespace WebApi.Controllers
             request.Headers.Add("accept", "application/json");
             request.Headers.Add("X-API-KEY", _sharedConfiguration.ApiKey);
             return request;
+        }
+
+        /// <summary>
+        /// получить список фильтров
+        /// </summary>
+        /// <returns>Возвращает фильтры для поиска в эндпоинте premieres</returns>
+        [HttpGet(Name = "filters")]
+        public async Task<IActionResult> Filters()
+        {
+            var countriesBytes = _cache.Get("countries");
+            if (countriesBytes != null)
+            {
+                var countriesString = Encoding.UTF8.GetString(countriesBytes);
+                var countries = JsonConvert.DeserializeObject<List<Country>>(countriesString);
+                var genres = Enum.GetValues(typeof(Genre)).Cast<Genre>();
+
+                var aGenres = genres.Select(item => new { Id = (int)item, country = item.GetAttribute<DisplayAttribute>()?.Name });
+
+
+                return Ok(new { genres = aGenres, countries });
+            }
+
+            return BadRequest();
+
         }
     }
 }

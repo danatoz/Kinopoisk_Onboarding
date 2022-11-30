@@ -3,6 +3,8 @@ using Common;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Dal;
+using WebApi.Services;
+using DbInitialize = WebApi.Services.DbInitialize;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -39,8 +41,16 @@ services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(configuration.GetConnectionString("Default"));
 });
+services.AddScoped<DbInitialize>();
+services.AddScoped<CacheInitializeService>();
 
 services.AddRouting(options => options.LowercaseUrls = true);
+
+services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = configuration.GetConnectionString("RedisCacheUrl");
+    options.InstanceName = "SampleInstance";
+});
 
 #endregion
 
@@ -48,6 +58,9 @@ services.AddRouting(options => options.LowercaseUrls = true);
 var app = builder.Build();
 
 #region Middleware
+
+await app.InitializeDatabase();
+await app.InitializeCache();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

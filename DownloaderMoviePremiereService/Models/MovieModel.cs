@@ -10,7 +10,7 @@ class MovieModel
     
     public string? posterUrl { get; set; }
     
-    public List<CountryModel>? countries { get; set; }
+    public List<Country>? countries { get; set; }
 
     public List<GenreModel>? genres { get; set; } 
 
@@ -25,7 +25,7 @@ class MovieModel
             PosterUrl = obj.posterUrl,
             Duration = TimeSpan.Parse(obj.duration),
             //Genres = obj.genres,
-            Countries = obj.countries! as IEnumerable<Country>
+            Countries = obj.countries
         } : null;
     }
 
