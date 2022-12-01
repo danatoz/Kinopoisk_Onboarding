@@ -4,7 +4,7 @@ namespace WebApi.Models;
 
 public class CountryModel
 {
-    public string country { get; set; }
+    public string? country { get; set; }
 
     public static Country? ConvertToEntity(CountryModel? obj)
     {
@@ -14,8 +14,23 @@ public class CountryModel
         } : null;
     }
 
-    public static List<Country> ConvertToEntities(List<CountryModel> objs)
+    public static List<Country> ConvertToEntities(List<CountryModel>? objs)
     {
         return objs.Select(ConvertToEntity).ToList();
+    }
+
+    public static CountryModel? ConvertToModel(Country? entity)
+    {
+        return entity != null
+            ? new CountryModel
+            {
+                country = entity?.Name
+            }
+            : null;
+    }
+
+    public static List<CountryModel>? ConvertToModels(List<Country>? entities)
+    {
+        return entities?.Select(ConvertToModel).ToList();
     }
 }

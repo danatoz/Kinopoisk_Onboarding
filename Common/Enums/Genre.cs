@@ -12,26 +12,35 @@ public enum Genre
     Drama = 2,
 
     [Display(Name="криминал")]
-    Crime = 3,
+    Crime = 4,
 
     [Display(Name="мелодрама")]
-    Melodrama = 4,
+    Melodrama = 8,
 
     [Display(Name="детектив")]
-    Detective = 5,
+    Detective = 16,
 
     [Display(Name="фантастика")]
-    Fiction = 6,
+    Fiction = 32,
 
     [Display(Name="приключения")]
-    Adventure = 7,
+    Adventure = 64,
 
     [Display(Name="биография")]
-    Biography = 8,
+    Biography = 128,
 
     [Display(Name="фильм-нуар")]
-    Filmnoir = 9,
+    Filmnoir = 256,
 
     [Display(Name="вестерн")]
-    Western = 10,
+    Western = 512,
+
+    [Display(Name = "боевик")]
+    Action = 1024,
+
+    [Display(Name = "фэнтези")]
+    Fantasy = 2048,
+
+    [Display(Name = "комедия")]
+    Comedy = 4096,
 }

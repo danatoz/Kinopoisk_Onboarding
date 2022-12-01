@@ -6,6 +6,7 @@ using System.Text;
 using Dal;
 using DownloaderMoviePremiereService.Models;
 using Entities;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace DownloaderMoviePremiereService;
@@ -26,6 +27,7 @@ class UpdateMoviesPremiereJob : IJob
 
     public async Task Execute(IJobExecutionContext context)
     {
+        await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE [\"Movies\", \"CountryMovie\"] RESTART IDENTITY;");
         var result = await Update();
         _logger.LogInformation($"Загружено: {result} премьер.");
     }
@@ -86,4 +88,6 @@ class UpdateMoviesPremiereJob : IJob
         request.Headers.Add("X-API-KEY", _sharedConfiguration.ApiKey);
         return request;
     }
+
+
 }

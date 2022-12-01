@@ -19,9 +19,9 @@ public class Movie
     
     public List<Country>? Countries { get; set; }
     
-    public Genre Genres { get; set; } 
+    public int Genres { get; set; } 
     
-    public TimeSpan Duration { get; set; }
+    public TimeSpan? Duration { get; set; }
 
     public int? MoviePremiereUpdateLogId { get; set; }
 

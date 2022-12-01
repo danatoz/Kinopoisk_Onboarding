@@ -29,7 +29,7 @@ class MovieModel
         } : null;
     }
 
-    public static List<Movie?> ConvertToEntities(List<MovieModel>? objs)
+    public static List<Movie> ConvertToEntities(List<MovieModel>? objs)
     {
         return objs.Select(ConvertToEntity).ToList();
     }

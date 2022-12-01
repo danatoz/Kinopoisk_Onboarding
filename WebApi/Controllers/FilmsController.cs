@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.RegularExpressions;
 using Common;
 using Common.Enums;
 using Dal;
@@ -8,6 +9,7 @@ using WebApi.Filters;
 using WebApi.Models;
 using Newtonsoft.Json;
 using Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.OpenApi.Extensions;
 using WebApi.Models.ViewModel;
@@ -46,40 +48,46 @@ namespace WebApi.Controllers
         /// <param name="page"></param>
         /// <returns>Возвращает список фильмов с пагинацией. Каждая страница содержит не более чем 20 фильмов. Данный эндпоинт не возращает более 400 фильмов. Используй /api/v1/films/filters чтобы получить id стран и жанров.</returns>
         [HttpGet(Name = "premieres")]
-        public async Task<IActionResult> Premieres([FromQuery]FilmFilterModel filters, int page = 1)
+        public async Task<IActionResult> Premieres([FromQuery] FilmFilterModel filters, [FromQuery] int page = 1)
         {
-            var currentMonth = (Months)DateTime.Now.Month;
-            var currentYear = DateTime.Now.Year;
-            var requestUri = new StringBuilder();
-
-            requestUri.Append("https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?");
-            requestUri.Append($"year={currentYear}");
-            requestUri.Append($"&month={currentMonth}");
-
-            var request = HttpRequestMessage(requestUri);
-
-            using var response = await _httpClient.SendAsync(request);
-
             const int pageSize = 10;
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                var jsonResult = JsonConvert.DeserializeObject<ResponseMoviesModel>(content);
 
-                if (jsonResult != null)
+            var movies = _dbContext.Movies.Include(item => item.Countries);
+            var total = await movies.CountAsync();
+            if (movies != null)
+            {
+                IQueryable<Movie> result = movies;
+
+                if (filters.SearchQuery != null)
                 {
-                    var result = jsonResult.items
-                        .Skip((page - 1 ) * pageSize).Take(pageSize).ToList();
+                    result = result.Where(item => item.NameRu != null && Regex.IsMatch(item.NameRu, Regex.Escape(filters.SearchQuery), RegexOptions.IgnoreCase));
+                }
+                if (filters.Countries != null)
+                {
+                    result = filters.Countries.Aggregate(result, (current, countryId) => 
+                        current.Where(item => item.Countries.Any(a => a.Id == countryId)));
+                }
+
+                if (filters.Genres != null)
+                {
+                    var genresFilter = filters.Genres.Sum();
+                    result = result.Where(item => (item.Genres & genresFilter) == genresFilter);
+                }
+                result = result.OrderBy(item => item.Id);
+                result = result.Skip((page - 1) * pageSize).Take(pageSize);
+
+                if (result != null)
+                {
                     var viewModel = new IndexViewModel<MovieModel>
                     {
-                        PageViewModel = new PageViewModel(jsonResult.total, page, pageSize),
-                        Items = result
+                        PageViewModel = new PageViewModel(total, page, pageSize),
+                        Items = MovieModel.ConvertToModels(result.ToList())
                     };
-
 
                     return Ok(viewModel);
                 }
             }
+
 
             return BadRequest();
         }
@@ -103,7 +111,8 @@ namespace WebApi.Controllers
             if (countriesBytes != null)
             {
                 var countriesString = Encoding.UTF8.GetString(countriesBytes);
-                var countries = JsonConvert.DeserializeObject<List<Country>>(countriesString);
+                var countries = JsonConvert.DeserializeObject<List<Country>>(countriesString)
+                    ?.Select(item => new { item.Id, item.Name });
                 var genres = Enum.GetValues(typeof(Genre)).Cast<Genre>();
 
                 var aGenres = genres.Select(item => new { Id = (int)item, country = item.GetAttribute<DisplayAttribute>()?.Name });
