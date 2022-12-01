@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using Common.Enums;
+
 namespace WebApi.Filters;
 
 public class FilmFilterModel
@@ -14,4 +17,8 @@ public class FilmFilterModel
     /// поиск фильма по наименованию
     /// </summary>
     public string? SearchQuery { get; set; }
+    /// <summary>
+    /// сортировка
+    /// </summary>
+    public Order Order { get; set; }
 }

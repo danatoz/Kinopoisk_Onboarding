@@ -14,9 +14,9 @@ public class CountryModel
         } : null;
     }
 
-    public static List<Country> ConvertToEntities(List<CountryModel>? objs)
+    public static List<Country?> ConvertToEntities(List<CountryModel>? objs)
     {
-        return objs.Select(ConvertToEntity).ToList();
+        return objs != null ?  objs.Select(ConvertToEntity).ToList() : new List<Country?>();
     }
 
     public static CountryModel? ConvertToModel(Country? entity)
@@ -29,8 +29,8 @@ public class CountryModel
             : null;
     }
 
-    public static List<CountryModel>? ConvertToModels(List<Country>? entities)
+    public static List<CountryModel?> ConvertToModels(List<Country?>? entities)
     {
-        return entities?.Select(ConvertToModel).ToList();
+        return entities != null ? entities.Select(ConvertToModel).ToList() : new List<CountryModel?>();
     }
 }

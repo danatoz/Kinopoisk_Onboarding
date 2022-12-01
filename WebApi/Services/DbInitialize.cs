@@ -94,10 +94,10 @@ public class DbInitialize
 
                 foreach (var movie in movies.Where(movie => movie != null))
                 {
-                    movie.MoviePremiereUpdateLogId = logEntity.Id;
+                    if (movie != null) movie.MoviePremiereUpdateLogId = logEntity.Id;
                 }
 
-                await _dbContext.Movies.AddRangeAsync(movies, cancel);
+                await _dbContext.Movies.AddRangeAsync(movies!, cancel);
                 await _dbContext.SaveChangesAsync(cancel);
 
                 return movies.Count;
@@ -110,7 +110,7 @@ public class DbInitialize
         }
 
         //TODO Что если статус код отрицательный
-        Task.Delay(new TimeSpan(0, 1, 0));
+        await Task.Delay(new TimeSpan(0, 1, 0), cancel);
 
         return await Update(cancel);
     }
@@ -145,11 +145,11 @@ public class DbInitialize
         {
             var content = await response.Content.ReadAsStringAsync();
             var jsonResult = JsonConvert.DeserializeObject<ResponseFiltersModel>(content);
-            var countries = CountryModel.ConvertToEntities(jsonResult.countries.ToList());
+            var countries = CountryModel.ConvertToEntities(jsonResult?.countries.ToList());
 
             if (countries != null)
             {
-                await _dbContext.Countries.AddRangeAsync(countries, cancel);
+                await _dbContext.Countries.AddRangeAsync(countries!, cancel);
 
                 await _dbContext.SaveChangesAsync(cancel);
             }

@@ -30,10 +30,4 @@ public static class Extensions
         var cacheInitializer = services.GetRequiredService<CacheInitializeService>();
         await cacheInitializer.CacheInitialize();
     }
-
-    public static T? GetAttribute<T>(this Enum value) 
-        where T : Attribute
-    {
-        return value.GetType().GetMember(value.ToString()).First().GetCustomAttribute<T>();
-    }
 }

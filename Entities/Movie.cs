@@ -17,7 +17,7 @@ public class Movie
     
     public string? PosterUrl { get; set; }
     
-    public List<Country>? Countries { get; set; }
+    public List<Country?>? Countries { get; set; }
     
     public int Genres { get; set; } 
     
@@ -26,5 +26,5 @@ public class Movie
     public int? MoviePremiereUpdateLogId { get; set; }
 
     [ForeignKey(nameof(MoviePremiereUpdateLogId))]
-    public MoviePremiereUpdateLog MoviePremiereUpdateLog { get; set; }
+    public MoviePremiereUpdateLog? MoviePremiereUpdateLog { get; set; }
 }

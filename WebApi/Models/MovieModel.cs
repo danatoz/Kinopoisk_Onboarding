@@ -1,3 +1,4 @@
+using System.Globalization;
 using Common.Enums;
 using Entities;
 
@@ -18,23 +19,23 @@ public class MovieModel
 
     public string? duration { get; set; }
 
-    public static Movie? ConvertToEntity(MovieModel? obj)
+    public static Movie? ConvertToEntity(MovieModel? model)
     {
-        double.TryParse(obj?.duration, out double duration);
-        return obj != null ? new Movie
+        double.TryParse(model?.duration, out double duration);
+        return model != null ? new Movie
         {
-            KinopoiskId = obj.kinopoiskId,
-            NameRu = obj.nameRu,
-            PosterUrl = obj.posterUrl,
+            KinopoiskId = model.kinopoiskId,
+            NameRu = model.nameRu,
+            PosterUrl = model.posterUrl,
             Duration = TimeSpan.FromMinutes(duration),
-            Genres = GenreModel.GenreLineToGenreEnums(obj.genres).Sum(item => (int)item),
-            Countries = CountryModel.ConvertToEntities(obj.countries)
+            Genres = GenreModel.GenreLineToGenreEnums(model.genres).Sum(item => (int)item),
+            Countries = CountryModel.ConvertToEntities(model.countries)
         } : null;
     }
 
-    public static List<Movie?> ConvertToEntities(List<MovieModel>? objs)
+    public static List<Movie?> ConvertToEntities(List<MovieModel>? models)
     {
-        return objs.Select(ConvertToEntity).ToList();
+        return models != null ? models.Select(ConvertToEntity).ToList() : new List<Movie?>();
     }
 
     public static MovieModel? ConvertToModel(Movie? entity)
@@ -45,7 +46,7 @@ public class MovieModel
             kinopoiskId = entity.KinopoiskId,
             nameRu = entity.NameRu,
             posterUrl = entity.PosterUrl,
-            duration = entity.Duration?.TotalMinutes.ToString(),
+            duration = entity.Duration?.TotalMinutes.ToString(CultureInfo.InvariantCulture),
             genres = GenreModel.CovertEnumToModel(entity.Genres),
             countries = CountryModel.ConvertToModels(entity.Countries)
         } : null;
@@ -53,6 +54,6 @@ public class MovieModel
 
     public static List<MovieModel?> ConvertToModels(List<Movie>? entities)
     {
-        return entities.Select(ConvertToModel).ToList();
+        return entities != null ? entities.Select(ConvertToModel).ToList() : new List<MovieModel?>();
     }
 }

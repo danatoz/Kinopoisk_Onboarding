@@ -52,10 +52,10 @@ class UpdateMoviesPremiereJob : IJob
 
                 foreach (var movie in movies.Where(movie => movie != null))
                 {
-                    movie.MoviePremiereUpdateLogId = logEntity.Id;
+                    if (movie != null) movie.MoviePremiereUpdateLogId = logEntity.Id;
                 }
 
-                await _dbContext.Movies.AddRangeAsync(movies);
+                await _dbContext.Movies.AddRangeAsync(movies!);
                 await _dbContext.SaveChangesAsync();
 
                 return movies.Count;
@@ -68,7 +68,7 @@ class UpdateMoviesPremiereJob : IJob
         }
 
         //TODO Что если статус код отрицательный
-        Task.Delay(new TimeSpan(0, 1, 0));
+        await Task.Delay(new TimeSpan(0, 1, 0));
 
         return await Update();
     }

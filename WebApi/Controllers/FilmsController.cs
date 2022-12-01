@@ -60,12 +60,14 @@ namespace WebApi.Controllers
 
                 if (filters.SearchQuery != null)
                 {
-                    result = result.Where(item => item.NameRu != null && Regex.IsMatch(item.NameRu, Regex.Escape(filters.SearchQuery), RegexOptions.IgnoreCase));
+                    result = result.Where(item => 
+                        item.NameRu != null && 
+                        Regex.IsMatch(item.NameRu, Regex.Escape(filters.SearchQuery), RegexOptions.IgnoreCase));
                 }
                 if (filters.Countries != null)
                 {
                     result = filters.Countries.Aggregate(result, (current, countryId) => 
-                        current.Where(item => item.Countries.Any(a => a.Id == countryId)));
+                        current.Where(item => item.Countries != null && item.Countries.Any(a => a != null && a.Id == countryId)));
                 }
 
                 if (filters.Genres != null)
@@ -73,7 +75,14 @@ namespace WebApi.Controllers
                     var genresFilter = filters.Genres.Sum();
                     result = result.Where(item => (item.Genres & genresFilter) == genresFilter);
                 }
-                result = result.OrderBy(item => item.Id);
+
+                result = filters.Order switch
+                {
+                    Order.Name => result.OrderBy(item => item.NameRu),
+                    Order.Duration => result.OrderBy(item => item.Duration),
+                    _ => result.OrderBy(item => item.Id)
+                };
+
                 result = result.Skip((page - 1) * pageSize).Take(pageSize);
 
                 if (result != null)
@@ -105,7 +114,7 @@ namespace WebApi.Controllers
         /// </summary>
         /// <returns>Возвращает фильтры для поиска в эндпоинте premieres</returns>
         [HttpGet(Name = "filters")]
-        public async Task<IActionResult> Filters()
+        public IActionResult Filters()
         {
             var countriesBytes = _cache.Get("countries");
             if (countriesBytes != null)

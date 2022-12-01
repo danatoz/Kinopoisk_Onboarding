@@ -20,7 +20,7 @@ public class GenreModel
 
     public static List<Genre> GenreLineToGenreEnums(List<GenreModel>? models)
     {
-        return models.Select(GenreLineToGenreEnum).ToList();
+        return models != null ? models.Select(GenreLineToGenreEnum).ToList() : new List<Genre>();
     }
 
     public static List<GenreModel> CovertEnumToModel(int genreInt)
