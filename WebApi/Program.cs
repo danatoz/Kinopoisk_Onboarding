@@ -1,11 +1,11 @@
-﻿using System.Reflection;
-using Common;
-using Microsoft.OpenApi.Models;
+﻿using Common;
 using Microsoft.EntityFrameworkCore;
 using Dal;
 using WebApi.Services;
-using DbInitialize = WebApi.Services.DbInitialize;
 using BL;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using WebApi.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -16,21 +16,7 @@ var configuration = builder.Configuration;
 
 services.AddControllers();
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen(c =>
-    {
-        c.SwaggerDoc("v1",
-            new OpenApiInfo
-            {
-                Title = "My API - V1",
-                Version = "v1"
-            }
-        );
-        // Set the comments path for the Swagger JSON and UI.
-        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-        c.IncludeXmlComments(xmlPath);
-    }
-);
+services.SwaggerConfiguration();
 
 var config = new SharedConfiguration
 {
@@ -54,6 +40,20 @@ services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "SampleInstance";
 });
 
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = AuthOptions.ISSUER,
+            ValidateAudience = true,
+            ValidAudience = AuthOptions.AUDIENCE,
+            ValidateLifetime = true,
+            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+            ValidateIssuerSigningKey = true,
+        };
+    });
 #endregion
 
 
@@ -64,13 +64,15 @@ var app = builder.Build();
 await app.InitializeDatabase();
 await app.InitializeCache();
 
+app.UseAuthentication();
+app.UseRouting();
+app.UseAuthorization();
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API - V1");
 });
-app.UseRouting();
-app.UseAuthorization();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapSwagger();

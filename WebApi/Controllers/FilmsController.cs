@@ -9,6 +9,7 @@ using WebApi.Filters;
 using WebApi.Models;
 using Newtonsoft.Json;
 using Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using WebApi.Models.ViewModel;
@@ -18,6 +19,7 @@ namespace WebApi.Controllers
     /// <summary>
     /// Контроллер
     /// </summary>
+    
     [ApiController]
     [Route("api/v1/[controller]/[action]/")]
     public class FilmsController : ControllerBase
@@ -47,6 +49,7 @@ namespace WebApi.Controllers
         /// <param name="page"></param>
         /// <returns>Возвращает список фильмов с пагинацией. Каждая страница содержит не более чем 20 фильмов. Данный эндпоинт не возращает более 400 фильмов. Используй /api/v1/films/filters чтобы получить id стран и жанров.</returns>
         [HttpGet(Name = "premieres")]
+        [Authorize]
         public async Task<IActionResult> Premieres([FromQuery] FilmFilterModel filters, [FromQuery] int page = 1)
         {
             const int pageSize = 10;
@@ -100,19 +103,12 @@ namespace WebApi.Controllers
             return BadRequest();
         }
 
-        private HttpRequestMessage HttpRequestMessage(StringBuilder requestUri)
-        {
-            using var request = new HttpRequestMessage(HttpMethod.Get, requestUri.ToString());
-            request.Headers.Add("accept", "application/json");
-            request.Headers.Add("X-API-KEY", _sharedConfiguration.ApiKey);
-            return request;
-        }
-
         /// <summary>
         /// получить список фильтров
         /// </summary>
         /// <returns>Возвращает фильтры для поиска в эндпоинте premieres</returns>
         [HttpGet(Name = "filters")]
+        [Authorize]
         public IActionResult Filters()
         {
             var countriesBytes = _cache.Get("countries");
