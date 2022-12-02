@@ -1,6 +1,6 @@
 version: "3.9"  # optional since v1.27.0
 services:
-  api:
+  webapi:
     build: .
     ports:
         - '5000:80'
@@ -9,7 +9,6 @@ services:
       - db
 
   redis:
-    container_name: r_cache
     image: redis:alpine
     volumes:
         - ./cache:/data
@@ -19,20 +18,17 @@ services:
       - '6379:6379'
 
   db:
-    container_name: pg_container
-    image: postgres
+    image: postgres:alpine
     restart: always
     volumes:
       - ./pg-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
-      POSTGRES_DB: test_db
     ports:
       - "5432:5432"
       
   pgadmin:
-    container_name: pgadmin4_container
     image: dpage/pgadmin4
     restart: always
     environment:
@@ -40,5 +36,12 @@ services:
       PGADMIN_DEFAULT_PASSWORD: root
     ports:
       - "5050:80"
+    depends_on:
+        - db
+
+
+
+  downloadermovieremiereservice:
+    image: kinopoisk_onboarding-downloadermoviesremiereservice
     depends_on:
         - db

@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+п»їusing System.ComponentModel.DataAnnotations;
 using Common.Enums;
 
 namespace WebApi.Filters;
@@ -6,19 +6,19 @@ namespace WebApi.Filters;
 public class FilmFilterModel
 {
     /// <summary>
-    /// список id стран разделенные запятой. Например countries=1,2,3. На данный момент можно указать не более одной страны.
+    /// СЃРїРёСЃРѕРє  СЃС‚СЂР°РЅ СЂР°Р·РґРµР»РµРЅРЅС‹Рµ Р·Р°РїСЏС‚РѕР№. РќР°РїСЂРёРјРµСЂ =1,2,3. РќР° РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚ РјРѕР¶РЅРѕ СѓРєР°Р·Р°С‚СЊ РЅРµ Р±РѕР»РµРµ РѕРґРЅРѕР№ СЃС‚СЂР°РЅС‹.
     /// </summary>
     public int[]? Countries { get; set; }
     /// <summary>
-    /// список id жанров разделенные запятой. Например genres=1,2,3. На данный момент можно указать не более одного жанра.
+    /// СЃРїРёСЃРѕРє  Р¶Р°РЅСЂРѕРІ СЂР°Р·РґРµР»РµРЅРЅС‹Рµ Р·Р°РїСЏС‚РѕР№. РќР°РїСЂРёРјРµСЂ =1,2,3. РќР° РґР°РЅРЅС‹Р№ РјРѕРјРµРЅС‚ РјРѕР¶РЅРѕ СѓРєР°Р·Р°С‚СЊ РЅРµ Р±РѕР»РµРµ РѕРґРЅРѕРіРѕ Р¶Р°РЅСЂР°.
     /// </summary>
     public int[]? Genres { get; set; }
     /// <summary>
-    /// поиск фильма по наименованию
+    /// РїРѕРёСЃРє С„РёР»СЊРјР° РїРѕ РЅР°РёРјРµРЅРѕРІР°РЅРёСЋ
     /// </summary>
     public string? SearchQuery { get; set; }
     /// <summary>
-    /// сортировка
+    /// СЃРѕСЂС‚РёСЂРѕРІРєР°
     /// </summary>
     public Order Order { get; set; }
 }

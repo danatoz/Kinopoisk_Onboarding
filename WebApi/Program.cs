@@ -1,10 +1,11 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Common;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Dal;
 using WebApi.Services;
 using DbInitialize = WebApi.Services.DbInitialize;
+using BL;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -39,10 +40,11 @@ services.AddSingleton(config);
 
 services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseNpgsql(configuration.GetConnectionString("Default"));
+    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
 });
 services.AddScoped<DbInitialize>();
 services.AddScoped<CacheInitializeService>();
+services.AddScoped<MovieBL>();
 
 services.AddRouting(options => options.LowercaseUrls = true);
 

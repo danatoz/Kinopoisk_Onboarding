@@ -1,5 +1,6 @@
-using System.Diagnostics;
+п»їusing System.Diagnostics;
 using System.Text;
+using BL;
 using Common;
 using Common.Enums;
 using Dal;
@@ -17,14 +18,14 @@ public class DbInitialize
     private readonly ILogger<DbInitialize> _logger;
     private readonly SharedConfiguration _sharedConfiguration;
     private readonly HttpClient _httpClient = new HttpClient();
-    private readonly IDistributedCache _cache;
+    private readonly MovieBL _movieBl;
 
-    public DbInitialize(AppDbContext dbContext, ILogger<DbInitialize> logger, SharedConfiguration configuration, IDistributedCache cache)
+    public DbInitialize(AppDbContext dbContext, ILogger<DbInitialize> logger, SharedConfiguration configuration, MovieBL movieBl)
     {
         _dbContext = dbContext;
         _logger = logger;
         _sharedConfiguration = configuration;
-        _cache = cache;
+        _movieBl = movieBl;
     }
 
     public async Task DeleteAsync(CancellationToken cancel)
@@ -43,13 +44,13 @@ public class DbInitialize
         var appliedMigrations = await _dbContext.Database.GetAppliedMigrationsAsync(cancel);
 
         if (appliedMigrations.Any())
-            _logger.LogInformation("К БД применены миграции: {0}", string.Join(",", appliedMigrations));
+            _logger.LogInformation("Рљ Р‘Р” РїСЂРёРјРµРЅРµРЅС‹ РјРёРіСЂР°С†РёРё: {0}", string.Join(",", appliedMigrations));
 
         if (pendingMigrations.Any())
         {
-            _logger.LogInformation("Применение миграций: {0}...", string.Join(",", pendingMigrations));
+            _logger.LogInformation("РџСЂРёРјРµРЅРµРЅРёРµ РјРёРіСЂР°С†РёР№: {0}...", string.Join(",", pendingMigrations));
             await _dbContext.Database.MigrateAsync(cancel);
-            _logger.LogInformation("Применение миграций выполнено");
+            _logger.LogInformation("РџСЂРёРјРµРЅРµРЅРёРµ РјРёРіСЂР°С†РёР№ РІС‹РїРѕР»РЅРµРЅРѕ");
         }
         else
         {
@@ -66,53 +67,11 @@ public class DbInitialize
     {
         var timer = Stopwatch.StartNew();
 
-        await Update(cancel);
+        await _movieBl.Update(cancel);
 
         await DownloadFilters(cancel);
 
-        _logger.LogInformation("Инициализация БД данными выполнена успешно за {0} мс", timer.ElapsedMilliseconds);
-    }
-
-    private async Task<int> Update(CancellationToken cancel)
-    {
-        var requestUri = BuildRequestForPremieres();
-        var request = HttpRequestMessage(requestUri);
-
-        using var response = await _httpClient.SendAsync(request, cancel);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var content = await response.Content.ReadAsStringAsync(cancel);
-            var jsonResult = JsonConvert.DeserializeObject<ResponseMoviesModel>(content);
-            var movies = MovieModel.ConvertToEntities(jsonResult?.items?.ToList());
-
-            try
-            {
-                var logEntity = new MoviePremiereUpdateLog { CreationDate = DateTime.UtcNow };
-                await _dbContext.MoviePremiereUpdateLogs.AddAsync(logEntity, cancel);
-                await _dbContext.SaveChangesAsync(cancel);
-
-                foreach (var movie in movies.Where(movie => movie != null))
-                {
-                    if (movie != null) movie.MoviePremiereUpdateLogId = logEntity.Id;
-                }
-
-                await _dbContext.Movies.AddRangeAsync(movies!, cancel);
-                await _dbContext.SaveChangesAsync(cancel);
-
-                return movies.Count;
-            }
-            catch (Exception e)
-            {
-                _logger.LogError($"{e.Message}");
-                _logger.LogError($"{e.StackTrace}");
-            }
-        }
-
-        //TODO Что если статус код отрицательный
-        await Task.Delay(new TimeSpan(0, 1, 0), cancel);
-
-        return await Update(cancel);
+        _logger.LogInformation("РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р‘Р” РґР°РЅРЅС‹РјРё РІС‹РїРѕР»РЅРµРЅР° СѓСЃРїРµС€РЅРѕ Р·Р° {0} РјСЃ", timer.ElapsedMilliseconds);
     }
 
     private HttpRequestMessage HttpRequestMessage(StringBuilder uri)
@@ -121,18 +80,6 @@ public class DbInitialize
         request.Headers.Add("accept", "application/json");
         request.Headers.Add("X-API-KEY", _sharedConfiguration.ApiKey);
         return request;
-    }
-
-    private static StringBuilder BuildRequestForPremieres()
-    {
-        var currentMonth = (Months)DateTime.Now.Month;
-        var currentYear = DateTime.Now.Year;
-        var requestUri = new StringBuilder();
-
-        requestUri.Append("https://kinopoiskapiunofficial.tech/api/v2.2/films/premieres?");
-        requestUri.Append($"year={currentYear}");
-        requestUri.Append($"&month={currentMonth}");
-        return requestUri;
     }
 
     private async Task DownloadFilters(CancellationToken cancel)

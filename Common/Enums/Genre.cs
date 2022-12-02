@@ -1,46 +1,46 @@
-using System.ComponentModel.DataAnnotations;
+п»їusing System.ComponentModel.DataAnnotations;
 
 namespace Common.Enums;
 
 [Flags]
 public enum Genre
 {
-    [Display(Name="триллер")]
+    [Display(Name="С‚СЂРёР»Р»РµСЂ")]
     Thriller = 1,
 
-    [Display(Name="драма")]
+    [Display(Name="РґСЂР°РјР°")]
     Drama = 2,
 
-    [Display(Name="криминал")]
+    [Display(Name="РєСЂРёРјРёРЅР°Р»")]
     Crime = 4,
 
-    [Display(Name="мелодрама")]
+    [Display(Name="РјРµР»РѕРґСЂР°РјР°")]
     Melodrama = 8,
 
-    [Display(Name="детектив")]
+    [Display(Name="РґРµС‚РµРєС‚РёРІ")]
     Detective = 16,
 
-    [Display(Name="фантастика")]
+    [Display(Name="С„Р°РЅС‚Р°СЃС‚РёРєР°")]
     Fiction = 32,
 
-    [Display(Name="приключения")]
+    [Display(Name="РїСЂРёРєР»СЋС‡РµРЅРёСЏ")]
     Adventure = 64,
 
-    [Display(Name="биография")]
+    [Display(Name="Р±РёРѕРіСЂР°С„РёСЏ")]
     Biography = 128,
 
-    [Display(Name="фильм-нуар")]
+    [Display(Name="С„РёР»СЊРј-РЅСѓР°СЂ")]
     Filmnoir = 256,
 
-    [Display(Name="вестерн")]
+    [Display(Name="РІРµСЃС‚РµСЂРЅ")]
     Western = 512,
 
-    [Display(Name = "боевик")]
+    [Display(Name = "Р±РѕРµРІРёРє")]
     Action = 1024,
 
-    [Display(Name = "фэнтези")]
+    [Display(Name = "С„СЌРЅС‚РµР·Рё")]
     Fantasy = 2048,
 
-    [Display(Name = "комедия")]
+    [Display(Name = "РєРѕРјРµРґРёСЏ")]
     Comedy = 4096,
 }

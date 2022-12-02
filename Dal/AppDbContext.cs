@@ -12,16 +12,10 @@ namespace Dal
         public DbSet<MoviePremiereUpdateLog> MoviePremiereUpdateLogs { get; set; } = null!;
 
         #endregion
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            //Database.EnsureCreated();
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=Kinopoisk_Onboarding;Username=root;Password=root");
-
-            base.OnConfiguring(optionsBuilder);
+            
         }
     }
 }

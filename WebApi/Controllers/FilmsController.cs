@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+п»їusing System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
 using Common;
@@ -11,13 +11,12 @@ using Newtonsoft.Json;
 using Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.OpenApi.Extensions;
 using WebApi.Models.ViewModel;
 
 namespace WebApi.Controllers
 {
     /// <summary>
-    /// Контроллер
+    /// РљРѕРЅС‚СЂРѕР»Р»РµСЂ
     /// </summary>
     [ApiController]
     [Route("api/v1/[controller]/[action]/")]
@@ -42,11 +41,11 @@ namespace WebApi.Controllers
         }
 
         /// <summary>
-        /// получить список фильмов по различным фильтрам
+        /// РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє С„РёР»СЊРјРѕРІ РїРѕ СЂР°Р·Р»РёС‡РЅС‹Рј С„РёР»СЊС‚СЂР°Рј
         /// </summary>
         /// <param name="filters"></param>
         /// <param name="page"></param>
-        /// <returns>Возвращает список фильмов с пагинацией. Каждая страница содержит не более чем 20 фильмов. Данный эндпоинт не возращает более 400 фильмов. Используй /api/v1/films/filters чтобы получить id стран и жанров.</returns>
+        /// <returns>Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃРїРёСЃРѕРє С„РёР»СЊРјРѕРІ СЃ РїР°РіРёРЅР°С†РёРµР№. РљР°Р¶РґР°СЏ СЃС‚СЂР°РЅРёС†Р° СЃРѕРґРµСЂР¶РёС‚ РЅРµ Р±РѕР»РµРµ С‡РµРј 20 С„РёР»СЊРјРѕРІ. Р”Р°РЅРЅС‹Р№ СЌРЅРґРїРѕРёРЅС‚ РЅРµ РІРѕР·СЂР°С‰Р°РµС‚ Р±РѕР»РµРµ 400 С„РёР»СЊРјРѕРІ. РСЃРїРѕР»СЊР·СѓР№ /api/v1/films/filters С‡С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ id СЃС‚СЂР°РЅ Рё Р¶Р°РЅСЂРѕРІ.</returns>
         [HttpGet(Name = "premieres")]
         public async Task<IActionResult> Premieres([FromQuery] FilmFilterModel filters, [FromQuery] int page = 1)
         {
@@ -110,9 +109,9 @@ namespace WebApi.Controllers
         }
 
         /// <summary>
-        /// получить список фильтров
+        /// РїРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє С„РёР»СЊС‚СЂРѕРІ
         /// </summary>
-        /// <returns>Возвращает фильтры для поиска в эндпоинте premieres</returns>
+        /// <returns>Р’РѕР·РІСЂР°С‰Р°РµС‚ С„РёР»СЊС‚СЂС‹ РґР»СЏ РїРѕРёСЃРєР° РІ СЌРЅРґРїРѕРёРЅС‚Рµ premieres</returns>
         [HttpGet(Name = "filters")]
         public IActionResult Filters()
         {
