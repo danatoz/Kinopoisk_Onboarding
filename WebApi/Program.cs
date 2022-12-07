@@ -1,8 +1,8 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Services;
 using BL;
+using BL.Constants;
 using BL.DependencyResolvers.Autofac;
 using Core.Configurations;
 using Core.Extensions;
@@ -29,7 +29,10 @@ var config = new SharedConfiguration
 {
     ApiKey = configuration["ApiKey"]
 };
+var uriConstSection = configuration.GetSection("UriConstSection");
+var uriConstant = new UriConstant(uriConstSection["FiltersUri"], uriConstSection["PremieresUriWithoutParams"]);
 services.AddSingleton(config);
+services.AddSingleton(uriConstant);
 
 services.AddDbContext<AppDbContext>(options =>
 {
@@ -49,7 +52,7 @@ services.AddStackExchangeRedisCache(options =>
 });
 
 services.AddJwtAuthentication(builder.Configuration);
-
+services.JobsInitialize();
 services.AddHostedService<DownloadMoviePremiereService>();
 #endregion
 

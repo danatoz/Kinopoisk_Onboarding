@@ -14,11 +14,14 @@ public class FilterBL
 
     private readonly ILogger<FilterBL> _logger;
 
-    public FilterBL(AppDbContext dbContext, SharedConfiguration sharedConfiguration, ILogger<FilterBL> logger)
+    private readonly UriConstant _uriConstant;
+
+    public FilterBL(AppDbContext dbContext, SharedConfiguration sharedConfiguration, ILogger<FilterBL> logger, UriConstant uriConstant)
     {
         _dbContext = dbContext;
         _sharedConfiguration = sharedConfiguration;
         _logger = logger;
+        _uriConstant = uriConstant;
     }
 
     public async Task<int> Update()
@@ -26,14 +29,14 @@ public class FilterBL
         try
         {
             var request = new ApiRequestBL<ResponseFiltersModel>();
-            var moviesModel = await request.Request(new HttpRequestConfiguration
+            var wrappeFilterModel = await request.Request(new HttpRequestConfiguration
             {
-                Uri = Constant.FiltersUri,
+                Uri = _uriConstant.FiltersUri,
                 Method = HttpMethod.Get,
                 Headers = new Dictionary<string, string>() { { "Accept", "application/json" }, { "X-API-KEY", _sharedConfiguration.ApiKey } }
             });
 
-            var countries = CountryModel.ConvertToEntities(moviesModel?.countries.ToList());
+            var countries = CountryModel.ConvertToEntities(wrappeFilterModel.Data.countries.ToList());
 
             await _dbContext.Countries.AddRangeAsync(countries);
 

@@ -1,60 +1,62 @@
-using BL;
-using Dal.Concrete.Context;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Quartz;
+using Quartz.Spi;
+using WebApi.Services.Jobs;
 
-
-namespace WebApi.Services;
-
-public class DownloadMoviePremiereService : IHostedService, IDisposable
+public class DownloadMoviePremiereService : IHostedService
 {
-    private int executionCount = 0;
-    
-    private readonly ILogger<DownloadMoviePremiereService> _logger;
+    private readonly ISchedulerFactory _schedulerFactory;
+    private readonly IJobFactory _jobFactory;
+    private readonly IEnumerable<JobSchedule> _jobSchedules;
 
-    private readonly IServiceScopeFactory _scopeFactory;
-
-    private readonly AppDbContext? _dbContext;
-
-    private readonly MovieBL _movieBl;
-
-    public DownloadMoviePremiereService(ILogger<DownloadMoviePremiereService> logger, IServiceScopeFactory scopeFactory)
+    public DownloadMoviePremiereService(
+        ISchedulerFactory schedulerFactory,
+        IJobFactory jobFactory,
+        IEnumerable<JobSchedule> jobSchedules)
     {
-        _logger = logger;
-        _scopeFactory = scopeFactory;
-        using var scope = scopeFactory.CreateScope();
-        _dbContext = scope.ServiceProvider.GetService<AppDbContext>();
-        _movieBl = scope.ServiceProvider.GetRequiredService<MovieBL>();
+        _schedulerFactory = schedulerFactory;
+        _jobSchedules = jobSchedules;
+        _jobFactory = jobFactory;
+    }
+    public IScheduler Scheduler { get; set; }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        Scheduler = await _schedulerFactory.GetScheduler(cancellationToken);
+        Scheduler.JobFactory = _jobFactory;
+
+        foreach (var jobSchedule in _jobSchedules)
+        {
+            var job = CreateJob(jobSchedule);
+            var trigger = CreateTrigger(jobSchedule);
+
+            await Scheduler.ScheduleJob(job, trigger, cancellationToken);
+        }
+
+        await Scheduler.Start(cancellationToken);
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Timed Hosted Service running.");
-        UpdatePremieresScheduledService(cancellationToken);
-
-        return Task.CompletedTask;
+        await Scheduler?.Shutdown(cancellationToken);
     }
 
-    private void UpdatePremieresScheduledService(object task)
+    private static IJobDetail CreateJob(JobSchedule schedule)
     {
-        var count = Interlocked.Increment(ref executionCount);
-
-        //await _dbContext.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Movies\", \"CountryMovie\" RESTART IDENTITY;");
-        //_logger.LogInformation($"Table Movies, CountryMovie cleared.");
-        //
-        //var result = await _movieBl.Update(CancellationToken.None);
-        //
-        //_logger.LogInformation($"Download: {result} premiers.");
+        var jobType = schedule.JobType;
+        return JobBuilder
+            .Create(jobType)
+            .WithIdentity(jobType.FullName)
+            .WithDescription(jobType.Name)
+            .Build();
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    private static ITrigger CreateTrigger(JobSchedule schedule)
     {
-        _logger.LogInformation("Timed Hosted Service is stopping.");
-        return Task.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-
+        return TriggerBuilder
+            .Create()
+            .WithIdentity($"{schedule.JobType.FullName}.trigger")
+            .WithCronSchedule(schedule.CronExpression)
+            .WithDescription(schedule.CronExpression)
+            .Build();
     }
 }

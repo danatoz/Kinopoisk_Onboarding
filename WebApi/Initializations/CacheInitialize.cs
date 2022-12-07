@@ -2,6 +2,7 @@ using Newtonsoft.Json;
 using System.Text;
 using Microsoft.Extensions.Caching.Distributed;
 using Dal.Concrete.Context;
+using BL.Constants;
 
 namespace WebApi.Initializations;
 
@@ -22,6 +23,6 @@ public class CacheInitializeService
         var countries = _dbContext.Countries.ToList();
         var chacheDataString = JsonConvert.SerializeObject(countries);
         var dataToCache = Encoding.UTF8.GetBytes(chacheDataString);
-        await _cache.SetAsync("countries", dataToCache);
+        await _cache.SetAsync(RedisKeyConstant.Countries, dataToCache);
     }
 }

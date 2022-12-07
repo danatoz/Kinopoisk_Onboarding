@@ -6,7 +6,7 @@ using Core.Utilities.Messages;
 
 namespace Core.Extensions;
 
-    public class ExceptionMiddleware
+public class ExceptionMiddleware
 {
     private RequestDelegate _next;
 

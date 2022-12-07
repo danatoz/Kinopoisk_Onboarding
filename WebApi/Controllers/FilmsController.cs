@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
+using BL.Constants;
 using Core.Configurations;
 using Core.Entities.Concrete;
 using Core.Entities.Enums;
@@ -102,7 +103,7 @@ namespace WebApi.Controllers
         [Authorize]
         public IActionResult Filters()
         {
-            var countriesBytes = _cache.Get("countries");
+            var countriesBytes = _cache.Get(RedisKeyConstant.Countries);
             if (countriesBytes != null)
             {
                 var countriesString = Encoding.UTF8.GetString(countriesBytes);
