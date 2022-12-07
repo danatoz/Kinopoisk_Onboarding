@@ -1,5 +1,6 @@
 using System.Globalization;
-using Entities;
+using Core.Entities.Concrete;
+
 
 namespace DownloaderMoviePremiereService.Models;
 

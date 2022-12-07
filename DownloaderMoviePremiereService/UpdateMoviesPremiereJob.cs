@@ -1,13 +1,11 @@
-using Common;
-using Common.Enums;
 using Quartz;
 using System.Text;
 using BL;
-using Dal;
 using DownloaderMoviePremiereService.Models;
-using Entities;
+
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Dal.Concrete.Context;
 
 namespace DownloaderMoviePremiereService;
 

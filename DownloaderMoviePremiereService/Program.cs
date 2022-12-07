@@ -1,9 +1,9 @@
 using BL;
-using Common;
-using Dal;
+using Core.Configurations;
 using DownloaderMoviePremiereService;
 using Quartz;
 using Microsoft.EntityFrameworkCore;
+using Dal.Concrete.Context;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services ) =>

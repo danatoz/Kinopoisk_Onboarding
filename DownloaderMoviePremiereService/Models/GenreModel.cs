@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using Common.Enums;
+using Core.Entities.Enums;
+
 
 namespace DownloaderMoviePremiereService.Models;
 

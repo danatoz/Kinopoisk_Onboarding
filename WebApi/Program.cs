@@ -1,22 +1,29 @@
-﻿using Common;
+﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using Dal;
 using WebApi.Services;
 using BL;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using WebApi.Authentication;
+using BL.DependencyResolvers.Autofac;
+using Core.Configurations;
+using Core.Extensions;
+using Dal.Concrete.Context;
+using WebApi.Extensions;
+using WebAPI.Extensions;
+using WebApi.Initializations;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 var configuration = builder.Configuration;
 
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+builder.Host.ConfigureContainer<ContainerBuilder>(builder => builder.RegisterModule(new AutofacBusinessModule()));
 
 #region Services
 
 services.AddControllers();
 services.AddEndpointsApiExplorer();
-services.SwaggerConfiguration();
+services.AddSwagger();
 
 var config = new SharedConfiguration
 {
@@ -31,6 +38,7 @@ services.AddDbContext<AppDbContext>(options =>
 services.AddScoped<DbInitialize>();
 services.AddScoped<CacheInitializeService>();
 services.AddScoped<MovieBL>();
+services.AddScoped<FilterBL>();
 
 services.AddRouting(options => options.LowercaseUrls = true);
 
@@ -40,20 +48,9 @@ services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "SampleInstance";
 });
 
-services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = AuthOptions.ISSUER,
-            ValidateAudience = true,
-            ValidAudience = AuthOptions.AUDIENCE,
-            ValidateLifetime = true,
-            IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-            ValidateIssuerSigningKey = true,
-        };
-    });
+services.AddJwtAuthentication(builder.Configuration);
+
+services.AddHostedService<DownloadMoviePremiereService>();
 #endregion
 
 
@@ -63,7 +60,7 @@ var app = builder.Build();
 
 await app.InitializeDatabase();
 await app.InitializeCache();
-
+app.ConfigureCustomExceptionMiddleware();
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();

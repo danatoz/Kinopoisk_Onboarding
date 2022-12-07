@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Common.Enums;
+using Core.Entities.Enums;
+
 
 namespace WebApi.Filters;
 
@@ -21,4 +22,8 @@ public class FilmFilterModel
     /// сортировка
     /// </summary>
     public Order Order { get; set; }
+
+    public int PageSize { get; set; } = 10;
+
+    public int Page { get; set; }
 }
