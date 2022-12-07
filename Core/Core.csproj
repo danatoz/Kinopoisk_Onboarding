@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <Folder Include="Configurations\" />
+    <Folder Include="Responses\" />
     <Folder Include="Utilities\Messages\" />
     <Folder Include="Utilities\Results\" />
     <Folder Include="Utilities\Security\JWT\" />

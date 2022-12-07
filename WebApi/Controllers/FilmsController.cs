@@ -1,19 +1,22 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
+using BL.Concrete;
 using BL.Constants;
 using Core.Configurations;
 using Core.Entities.Concrete;
 using Core.Entities.Enums;
 using Core.Entities.Models;
 using Core.Entities.Models.ViewModel;
+using Core.Responses;
 using Microsoft.AspNetCore.Mvc;
-using WebApi.Filters;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Dal.Concrete.Context;
+using Microsoft.AspNetCore.Http.Features;
+using Core.Utilities.Results;
 
 namespace WebApi.Controllers
 {
@@ -27,18 +30,13 @@ namespace WebApi.Controllers
     {
         private readonly ILogger<FilmsController> _logger;
 
-        private static readonly HttpClient _httpClient = new HttpClient();
-
-        private readonly SharedConfiguration _sharedConfiguration;
-
         private readonly AppDbContext _dbContext;
 
         private readonly IDistributedCache _cache;
 
-        public FilmsController(ILogger<FilmsController> logger, SharedConfiguration sharedConfiguration, AppDbContext dbContext, IDistributedCache cache)
+        public FilmsController(ILogger<FilmsController> logger, AppDbContext dbContext, IDistributedCache cache)
         {
             _logger = logger;
-            _sharedConfiguration = sharedConfiguration;
             _dbContext = dbContext;
             _cache = cache;
         }
@@ -50,49 +48,15 @@ namespace WebApi.Controllers
         /// <param name="page"></param>
         /// <returns>Возвращает список фильмов с пагинацией. Каждая страница содержит не более чем 20 фильмов. Данный эндпоинт не возращает более 400 фильмов. Используй /api/v1/films/filters чтобы получить id стран и жанров.</returns>
         [HttpGet(Name = "premieres")]
-        [Authorize]
-        public async Task<IActionResult> Premieres([FromQuery] FilmFilterModel filters)
+        //[Authorize]
+        public async Task<ResponseWrapper<MovieViewModel>> Premieres([FromQuery] MovieFilterViewModel filters)
         {
-            var movies = _dbContext.Movies.Include(item => item.Countries);
-            var total = await movies.CountAsync();
+            var result = await new MoviePageNavigation(_dbContext).Pagination(filters);
 
-            IQueryable<Movie> result = movies;
-
-            if (filters.SearchQuery != null)
+            return new ResponseWrapper<MovieViewModel>(OperationStatus.Success)
             {
-                result = result.Where(item =>
-                    item.NameRu != null &&
-                    Regex.IsMatch(item.NameRu, Regex.Escape(filters.SearchQuery), RegexOptions.IgnoreCase));
-            }
-            if (filters.Countries != null)
-            {
-                result = filters.Countries.Aggregate(result, (current, countryId) =>
-                    current.Where(item => item.Countries != null && item.Countries.Any(a => a != null && a.Id == countryId)));
-            }
-
-            if (filters.Genres != null)
-            {
-                var genresFilter = filters.Genres.Sum();
-                result = result.Where(item => (item.Genres & genresFilter) == genresFilter);
-            }
-
-            result = filters.Order switch
-            {
-                Order.Name => result.OrderBy(item => item.NameRu),
-                Order.Duration => result.OrderBy(item => item.Duration),
-                _ => result.OrderBy(item => item.Id)
+                ResponseData = result
             };
-
-            result = result.Skip(filters.Page * filters.PageSize).Take(filters.PageSize);
-
-
-            var viewModel = new IndexViewModel<MovieModel>
-            {
-                PageViewModel = new PageViewModel(total, filters.Page, filters.PageSize),
-                Items = MovieModel.ConvertToModels(result.ToList())
-            };
-
-            return Ok(viewModel);
         }
 
         /// <summary>
@@ -100,7 +64,7 @@ namespace WebApi.Controllers
         /// </summary>
         /// <returns>Возвращает фильтры для поиска в эндпоинте premieres</returns>
         [HttpGet(Name = "filters")]
-        [Authorize]
+        //[Authorize]
         public IActionResult Filters()
         {
             var countriesBytes = _cache.Get(RedisKeyConstant.Countries);

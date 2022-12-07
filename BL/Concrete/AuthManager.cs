@@ -32,9 +32,9 @@ public class AuthManager : IAuthService
 
     public IDataResult<AccessToken> Login(UserModel userModel)
     {
-        //Check user in db
+        //TODO Check user in db
 
-        //Validate user password
+        //TODO Validate user password
         var tokenModel = CreateAccessToken(userModel);
 
         return tokenModel;
