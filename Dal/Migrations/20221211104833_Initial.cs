@@ -26,19 +26,6 @@ namespace Dal.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MoviePremiereUpdateLogs",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CreationDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MoviePremiereUpdateLogs", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Movies",
                 columns: table => new
                 {
@@ -48,18 +35,11 @@ namespace Dal.Migrations
                     NameRu = table.Column<string>(type: "text", nullable: true),
                     PosterUrl = table.Column<string>(type: "text", nullable: true),
                     Genres = table.Column<int>(type: "integer", nullable: false),
-                    Duration = table.Column<TimeSpan>(type: "interval", nullable: false),
-                    MoviePremiereUpdateLogId = table.Column<int>(type: "integer", nullable: false)
+                    Duration = table.Column<TimeSpan>(type: "interval", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Movies", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Movies_MoviePremiereUpdateLogs_MoviePremiereUpdateLogId",
-                        column: x => x.MoviePremiereUpdateLogId,
-                        principalTable: "MoviePremiereUpdateLogs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -97,11 +77,6 @@ namespace Dal.Migrations
                 column: "MoviesId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Movies_MoviePremiereUpdateLogId",
-                table: "Movies",
-                column: "MoviePremiereUpdateLogId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Movies_NameRu",
                 table: "Movies",
                 column: "NameRu");
@@ -118,9 +93,6 @@ namespace Dal.Migrations
 
             migrationBuilder.DropTable(
                 name: "Movies");
-
-            migrationBuilder.DropTable(
-                name: "MoviePremiereUpdateLogs");
         }
     }
 }

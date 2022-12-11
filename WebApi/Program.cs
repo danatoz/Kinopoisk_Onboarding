@@ -2,6 +2,8 @@
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using BL;
+using BL.Abstract;
+using BL.Concrete;
 using BL.Constants;
 using BL.DependencyResolvers.Autofac;
 using Core.Configurations;
@@ -38,10 +40,9 @@ services.AddDbContext<AppDbContext>(options =>
 {
     options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"));
 });
+
 services.AddScoped<DbInitialize>();
 services.AddScoped<CacheInitializeService>();
-services.AddScoped<MovieBL>();
-services.AddScoped<FilterBL>();
 
 services.AddRouting(options => options.LowercaseUrls = true);
 

@@ -15,9 +15,9 @@ public class Movie
 
     public string? PosterUrl { get; set; }
 
-    public List<Country?>? Countries { get; set; }
-
     public int Genres { get; set; }
 
     public TimeSpan? Duration { get; set; }
+
+    public List<Country> Countries { get; set; }
 }

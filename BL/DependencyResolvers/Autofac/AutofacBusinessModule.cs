@@ -11,5 +11,13 @@ public class AutofacBusinessModule : Module
     {
         builder.RegisterType<AuthManager>().As<IAuthService>().SingleInstance();
 
+        builder.RegisterType<FilterManager>().As<IFilterService>().SingleInstance();
+
+        builder.RegisterType<MovieManager>().As<IMovieService>().SingleInstance();
+
+        builder.RegisterGeneric(typeof(ApiManager<>)).As(typeof(IApiService<>)).InstancePerLifetimeScope();
+
+
+        
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.RegularExpressions;
+using BL.Abstract;
 using BL.Concrete;
 using BL.Constants;
 using Core.Configurations;
@@ -28,17 +29,17 @@ namespace WebApi.Controllers
     [Route("api/v1/[controller]/[action]/")]
     public class FilmsController : ControllerBase
     {
-        private readonly ILogger<FilmsController> _logger;
-
         private readonly AppDbContext _dbContext;
 
-        private readonly IDistributedCache _cache;
+        private readonly IFilterService _filterManager;
 
-        public FilmsController(ILogger<FilmsController> logger, AppDbContext dbContext, IDistributedCache cache)
+        private readonly IMovieService _movieService;
+
+        public FilmsController(AppDbContext dbContext, IFilterService filterManager, IMovieService movieService)
         {
-            _logger = logger;
             _dbContext = dbContext;
-            _cache = cache;
+            _filterManager = filterManager;
+            _movieService = movieService;
         }
 
         /// <summary>
@@ -51,12 +52,11 @@ namespace WebApi.Controllers
         //[Authorize]
         public async Task<ResponseWrapper<MovieViewModel>> Premieres([FromQuery] MovieFilterViewModel filters)
         {
-            var result = await new MoviePageNavigation(_dbContext).Pagination(filters);
+            var result = await _movieService.GetPremieres(filters);
 
-            return new ResponseWrapper<MovieViewModel>(OperationStatus.Success)
-            {
-                ResponseData = result
-            };
+            return result != null
+                ? new ResponseWrapper<MovieViewModel>(OperationStatus.Success) { ResponseData = result }
+                : new ResponseWrapper<MovieViewModel>(OperationStatus.Failed);
         }
 
         /// <summary>
@@ -65,24 +65,13 @@ namespace WebApi.Controllers
         /// <returns>Возвращает фильтры для поиска в эндпоинте premieres</returns>
         [HttpGet(Name = "filters")]
         //[Authorize]
-        public IActionResult Filters()
+        public ResponseWrapper<FilterWrapper> Filters()
         {
-            var countriesBytes = _cache.Get(RedisKeyConstant.Countries);
-            if (countriesBytes != null)
-            {
-                var countriesString = Encoding.UTF8.GetString(countriesBytes);
-                var countries = JsonConvert.DeserializeObject<List<Country>>(countriesString)
-                    ?.Select(item => new { item.Id, item.Name });
-                var genres = Enum.GetValues(typeof(Genre)).Cast<Genre>();
+            var result = _filterManager.GetAll();
 
-                var aGenres = genres.Select(item => new { Id = (int)item, country = item.GetAttribute<DisplayAttribute>()?.Name });
-
-
-                return Ok(new { genres = aGenres, countries });
-            }
-
-            return BadRequest();
-
+            return result != null
+                ? new ResponseWrapper<FilterWrapper>(OperationStatus.Success) { ResponseData = result }
+                : new ResponseWrapper<FilterWrapper>(OperationStatus.Failed);
         }
     }
 }

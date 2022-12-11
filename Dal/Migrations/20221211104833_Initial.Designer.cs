@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Dal.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20221130080917_Initial")]
+    [Migration("20221211104833_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -25,22 +25,7 @@ namespace Dal.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("CountryMovie", b =>
-                {
-                    b.Property<int>("CountriesId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MoviesId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("CountriesId", "MoviesId");
-
-                    b.HasIndex("MoviesId");
-
-                    b.ToTable("CountryMovie");
-                });
-
-            modelBuilder.Entity("Entities.Country", b =>
+            modelBuilder.Entity("Core.Entities.Concrete.Country", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -58,7 +43,7 @@ namespace Dal.Migrations
                     b.ToTable("Countries");
                 });
 
-            modelBuilder.Entity("Entities.Movie", b =>
+            modelBuilder.Entity("Core.Entities.Concrete.Movie", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -66,17 +51,13 @@ namespace Dal.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<TimeSpan>("Duration")
+                    b.Property<TimeSpan?>("Duration")
                         .HasColumnType("interval");
 
                     b.Property<int>("Genres")
                         .HasColumnType("integer");
 
                     b.Property<int>("KinopoiskId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("MoviePremiereUpdateLogId")
-                        .IsRequired()
                         .HasColumnType("integer");
 
                     b.Property<string>("NameRu")
@@ -87,53 +68,39 @@ namespace Dal.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MoviePremiereUpdateLogId");
-
                     b.HasIndex("NameRu");
 
                     b.ToTable("Movies");
                 });
 
-            modelBuilder.Entity("Entities.MoviePremiereUpdateLog", b =>
+            modelBuilder.Entity("CountryMovie", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("CountriesId")
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<int>("MoviesId")
+                        .HasColumnType("integer");
 
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
+                    b.HasKey("CountriesId", "MoviesId");
 
-                    b.HasKey("Id");
+                    b.HasIndex("MoviesId");
 
-                    b.ToTable("MoviePremiereUpdateLogs");
+                    b.ToTable("CountryMovie");
                 });
 
             modelBuilder.Entity("CountryMovie", b =>
                 {
-                    b.HasOne("Entities.Country", null)
+                    b.HasOne("Core.Entities.Concrete.Country", null)
                         .WithMany()
                         .HasForeignKey("CountriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entities.Movie", null)
+                    b.HasOne("Core.Entities.Concrete.Movie", null)
                         .WithMany()
                         .HasForeignKey("MoviesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Entities.Movie", b =>
-                {
-                    b.HasOne("Entities.MoviePremiereUpdateLog", "MoviePremiereUpdateLog")
-                        .WithMany()
-                        .HasForeignKey("MoviePremiereUpdateLogId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MoviePremiereUpdateLog");
                 });
 #pragma warning restore 612, 618
         }

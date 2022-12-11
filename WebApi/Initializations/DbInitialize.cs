@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics;
 using BL;
+using BL.Abstract;
+using BL.Concrete;
 using Dal.Concrete.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,16 +13,16 @@ public class DbInitialize
     
     private readonly ILogger<DbInitialize> _logger;
 
-    private readonly MovieBL _movieBl;
+    private readonly IFilterService _filterManager;
 
-    private readonly FilterBL _filterBl;
+    private readonly IMovieService _movieService;
 
-    public DbInitialize(AppDbContext dbContext, ILogger<DbInitialize> logger, MovieBL movieBl, FilterBL filterBl)
+    public DbInitialize(AppDbContext dbContext, ILogger<DbInitialize> logger, IFilterService filterManager, IMovieService movieService)
     {
         _dbContext = dbContext;
         _logger = logger;
-        _movieBl = movieBl;
-        _filterBl = filterBl;
+        _filterManager = filterManager;
+        _movieService = movieService;
     }
 
     public async Task DeleteAsync(CancellationToken cancel)
@@ -62,9 +64,9 @@ public class DbInitialize
     {
         var timer = Stopwatch.StartNew();
 
-        await _movieBl.Update(cancel);
+        await _filterManager.Download(cancel);
 
-        await _filterBl.Update();
+        await _movieService.Download(cancel);
 
         _logger.LogInformation("Database initialization is successful {0} ms", timer.ElapsedMilliseconds);
     }

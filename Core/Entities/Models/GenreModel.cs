@@ -5,6 +5,8 @@ namespace Core.Entities.Models;
 
 public class GenreModel
 {
+    public int Id { get; set; }
+
     public string? genre { get; set; }
 
     public static Genre GenreLineToGenreEnum(GenreModel model)

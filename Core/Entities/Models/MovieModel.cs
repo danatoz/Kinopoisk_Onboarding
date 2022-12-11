@@ -1,4 +1,5 @@
 using System.Globalization;
+using AutoMapper;
 using Core.Entities.Concrete;
 
 namespace Core.Entities.Models;
@@ -21,15 +22,23 @@ public class MovieModel
     public static Movie? ConvertToEntity(MovieModel? model)
     {
         double.TryParse(model?.duration, out double duration);
-        return model != null ? new Movie
+
+        var config = new MapperConfiguration(cfg =>
         {
-            KinopoiskId = model.kinopoiskId,
-            NameRu = model.nameRu,
-            PosterUrl = model.posterUrl,
-            Duration = TimeSpan.FromMinutes(duration),
-            Genres = GenreModel.GenreLineToGenreEnums(model.genres).Sum(item => (int)item),
-            Countries = CountryModel.ConvertToEntities(model.countries)
-        } : null;
+            cfg.CreateMap<MovieModel, Movie>()
+                .ForMember(o => o.Duration, o =>
+                    o.MapFrom(v => TimeSpan.FromMinutes(duration)))
+                .ForMember(dest => dest.Countries, 
+                    act => 
+                        act.MapFrom(src => CountryModel.ConvertToEntities(src.countries)))
+                .ForMember(dest => dest.Genres, 
+                    act => act.MapFrom(src => 
+                        GenreModel.GenreLineToGenreEnums(src.genres).Sum(item => (int)item)));
+        });
+        var mapper = config.CreateMapper();
+
+        var result = mapper.Map<Movie>(model);
+        return result;
     }
 
     public static List<Movie?> ConvertToEntities(List<MovieModel>? models)
@@ -39,16 +48,22 @@ public class MovieModel
 
     public static MovieModel? ConvertToModel(Movie? entity)
     {
-        
-        return entity != null ? new MovieModel
+        var config = new MapperConfiguration(cfg =>
         {
-            kinopoiskId = entity.KinopoiskId,
-            nameRu = entity.NameRu,
-            posterUrl = entity.PosterUrl,
-            duration = entity.Duration?.TotalMinutes.ToString(CultureInfo.InvariantCulture),
-            genres = GenreModel.CovertEnumToModel(entity.Genres),
-            countries = CountryModel.ConvertToModels(entity.Countries)
-        } : null;
+            cfg.CreateMap<Movie, MovieModel>()
+                .ForMember(dest => dest.duration,
+                    act =>
+                    act.MapFrom(src => src.Duration.Value.TotalMinutes.ToString(CultureInfo.InvariantCulture)))
+                .ForMember(dest => dest.genres, 
+                    act => 
+                        act.MapFrom(src => GenreModel.CovertEnumToModel(src.Genres)))
+                .ForMember(dest => dest.countries, 
+                    act => 
+                        act.MapFrom(src => CountryModel.ConvertToModels(src.Countries)));
+        });
+        var mapper = config.CreateMapper();
+
+        return mapper.Map<MovieModel>(entity);
     }
 
     public static List<MovieModel?> ConvertToModels(List<Movie>? entities)
